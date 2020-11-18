@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
-
+{-
+This is based on an example from the original daemons repository, a simple
+in-memory key-value store. I've just expanded this so it takes an additional
+command to stop the daemon. Not particularly useful, but wanted to see how
+that works.
+-}
 module Main where
 
 import Control.Concurrent.MVar ( MVar, newMVar, modifyMVar )
