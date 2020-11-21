@@ -25,3 +25,17 @@ executable daemon-test
                      , cereal
                      , filepath
                      , directory
+
+executable daemon-test-2
+  hs-source-dirs:      src
+  main-is:             DaemonMain.hs
+  ghc-options:         -main-is DaemonMain
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , daemons
+                     , bytestring
+                     , data-default
+                     , containers
+                     , cereal
+                     , filepath
+                     , directory
