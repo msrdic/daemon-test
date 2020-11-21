@@ -1,4 +1,4 @@
-module DaemonMain (main) where
+module Main (main) where
 
 import System.Environment ( getArgs )
 import System.Daemon
