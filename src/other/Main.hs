@@ -23,16 +23,15 @@ stopDaemon =
     kill
     (return . show)
 
-startDaemon :: DaemonOptions -> (String -> IO String) -> IO String
+startDaemon :: DaemonOptions -> (String -> IO ()) -> IO String
 startDaemon opt prog = do
   ensureDaemonRunning "daemon-test" opt prog
   return "Started."
 
-printAndSleep :: String -> IO String
-printAndSleep arg = do
+printAndSleep :: String -> IO ()
+printAndSleep _ = do
   threadDelay 1000000
-  print $ arg ++ "."
-  return arg
+  print "."
 
 main :: IO ()
 main = do
