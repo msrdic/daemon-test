@@ -23,8 +23,10 @@ stopDaemon =
     kill
     (return . show)
 
-startDaemon :: DaemonOptions -> (String -> IO String) -> IO ()
-startDaemon = ensureDaemonRunning "daemon-test"
+startDaemon :: DaemonOptions -> (String -> IO String) -> IO String
+startDaemon opt prog = do
+  ensureDaemonRunning "daemon-test" opt prog
+  return "Started."
 
 printAndSleep :: String -> IO String
 printAndSleep arg = do
@@ -38,7 +40,7 @@ main = do
   args <- getArgs
   let args' = map fromString args
   v <- case args' of
-    ["start"] -> startDaemon options printAndSleep >> return "Success"
+    ["start"] -> startDaemon options printAndSleep
     ["stop"]  -> stopDaemon
-    _         -> error "invalid command"
+    _         -> return $ "invalid command" ++ show args'
   print $ "Done: " ++ v
