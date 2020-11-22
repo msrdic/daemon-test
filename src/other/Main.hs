@@ -14,6 +14,8 @@ import GHC.Generics (Generic)
 import Data.Serialize ( Serialize )
 import Data.Maybe ( fromMaybe )
 
+port = 7856
+
 data Command = Start | Status | Stop deriving (Show, Generic)
 instance Serialize Command
 
@@ -39,7 +41,7 @@ startDaemon opt prog = do
 
 daemonStatus :: IO DaemonStatus
 daemonStatus = do
-  result <- runClient "localhost" 7856 Status
+  result <- runClient "localhost" port Status
   return $ fromMaybe NA result
 
 printAndSleep :: Command -> IO DaemonStatus
@@ -50,7 +52,7 @@ printAndSleep command =
 
 main :: IO ()
 main = do
-  let options = def { daemonPort = 7856 }
+  let options = def { daemonPort = port }
   args <- getArgs
   let args' = map fromString args
   v <- case args' of
