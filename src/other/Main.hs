@@ -2,7 +2,7 @@
 module Main (main) where
 
 import System.Environment ( getArgs )
-import System.Daemon ( ensureDaemonRunning, DaemonOptions( daemonPort ), runClient )
+import System.Daemon (Port,  ensureDaemonRunning, DaemonOptions( daemonPort ), runClient )
 import System.Posix.Daemon ( kill )
 import System.FilePath ( (</>), (<.>) )
 import System.Directory ( getHomeDirectory )
@@ -14,6 +14,7 @@ import GHC.Generics (Generic)
 import Data.Serialize ( Serialize )
 import Data.Maybe ( fromMaybe )
 
+port :: Port
 port = 7856
 
 data Command = Start | Status | Stop deriving (Show, Generic)
