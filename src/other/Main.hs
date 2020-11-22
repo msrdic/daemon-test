@@ -1,37 +1,52 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Main (main) where
 
 import System.Environment ( getArgs )
-import System.Daemon
-    ( ensureDaemonRunning, DaemonOptions(daemonPort) )
+import System.Daemon ( ensureDaemonRunning, DaemonOptions( daemonPort ), runClient )
 import System.Posix.Daemon ( kill )
 import System.FilePath ( (</>), (<.>) )
 import System.Directory ( getHomeDirectory )
 import Control.Exception ( bracket )
-import Control.Concurrent ( threadDelay )
 
 import Data.Default ( def )
 import Data.String ( fromString )
+import GHC.Generics (Generic)
+import Data.Serialize ( Serialize )
+import Data.Maybe ( fromMaybe )
 
-stopDaemon :: IO String
+data Command = Start | Status | Stop deriving (Show, Generic)
+instance Serialize Command
+
+data DaemonStatus = Running | Stopped | NA deriving (Show, Generic)
+instance Serialize DaemonStatus
+
+getPidFilePath :: IO FilePath
+getPidFilePath = do
+  home <- getHomeDirectory
+  return $ home </> ("." ++ "daemon-test") <.> "pid"
+
+stopDaemon :: IO DaemonStatus
 stopDaemon =
   bracket
-    (do
-      home <- getHomeDirectory
-      let pidfile = home </> ("." ++ "daemon-test") <.> "pid"
-      return pidfile
-    )
+    getPidFilePath
     kill
-    (return . show)
+    (`seq` return Stopped)
 
-startDaemon :: DaemonOptions -> (String -> IO ()) -> IO String
+startDaemon :: (Serialize a, Serialize b) => DaemonOptions -> (a -> IO b) -> IO DaemonStatus
 startDaemon opt prog = do
   ensureDaemonRunning "daemon-test" opt prog
-  return "Started."
+  return Running
 
-printAndSleep :: String -> IO ()
-printAndSleep _ = do
-  threadDelay 1000000
-  print "."
+daemonStatus :: IO DaemonStatus
+daemonStatus = do
+  result <- runClient "localhost" 7856 Status
+  return $ fromMaybe NA result
+
+printAndSleep :: Command -> IO DaemonStatus
+printAndSleep command =
+  case command of
+    Status -> return Running
+    _      -> return NA
 
 main :: IO ()
 main = do
@@ -39,7 +54,8 @@ main = do
   args <- getArgs
   let args' = map fromString args
   v <- case args' of
-    ["start"] -> startDaemon options printAndSleep
-    ["stop"]  -> stopDaemon
-    _         -> return $ "invalid command" ++ show args'
-  print $ "Done: " ++ v
+    ["start"]  -> startDaemon options printAndSleep
+    ["stop"]   -> stopDaemon
+    ["status"] -> daemonStatus
+    _          -> error $ "invalid command" ++ show args'
+  putStrLn $ "Done: " ++ show v
