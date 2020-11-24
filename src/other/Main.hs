@@ -60,5 +60,5 @@ main = do
     ["start"]  -> startDaemon options printAndSleep
     ["stop"]   -> stopDaemon
     ["status"] -> daemonStatus
-    _          -> error $ "invalid command" ++ show args'
+    _          -> return NA
   putStrLn $ "Done: " ++ show v
